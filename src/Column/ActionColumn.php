@@ -17,7 +17,7 @@ class ActionColumn extends TwigColumn
             ->setDefault("type", self::TYPE_TOOLBAR)
             ->setDefault("orderable", false)
             ->setDefault("searchable", false)
-            ->setDefault("template", "@Datatables/Column/ActionColumn/%s.html.twig")
+            ->setDefault("template", "@DataTables/Column/ActionColumn/%s.html.twig")
             ->setRequired("items")
             ->setRequired("type")
             ->setAllowedTypes("items", ["array", "Closure"])
