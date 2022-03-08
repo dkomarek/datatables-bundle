@@ -21,6 +21,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class DateTimeColumn extends AbstractColumn
 {
+    private string $format;
+
+    public function __construct(string $format = "c")
+    {
+        $this->format = $format;
+    }
+
     /**
      * {@inheritdoc}
      */
