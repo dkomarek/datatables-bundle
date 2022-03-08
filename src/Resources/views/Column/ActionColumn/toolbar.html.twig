@@ -1,0 +1,19 @@
+{% for item in items %}
+    {% set itemLabel = item.label ?? (datatable.name ~ "." ~ item.key) | trans %}
+
+    {% if item.path %}
+        {% if item.icon %}
+            <a class="btn btn-icon btn-bg-light btn-sm w-30px h-30px me-1 btn-active-light btn-active-color-{{ item.contextClass ?? "primary" }}"
+               href="{{ item.path }}" data-kt-docs-table-filter="{{ item.key }}_row" title="{{ itemLabel }}">
+                <i class="{{ item.icon }}"></i>
+            </a>
+        {% else %}
+            <a class="btn btn-sm {{ item.contextClass ? "btn-" ~ item.contextClass : "btn-light" }}"
+               href="{{ item.path }}" data-kt-docs-table-filter="{{ item.key }}_row">
+                {{ itemLabel }}
+            </a>
+        {% endif %}
+    {% else %}
+        {# TODO: Plain text #}
+    {% endif %}
+{% endfor %}

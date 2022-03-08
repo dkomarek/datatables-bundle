@@ -1,0 +1,21 @@
+<a href="#" class="btn btn-light btn-active-light-primary btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end" data-kt-menu-flip="top-end">
+    {{ label | trans }}
+    <i class="bi bi-chevron-down"></i>
+</a>
+
+<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4" data-kt-menu="true">
+    {% for item in items %}
+        {% set itemLabel = item.label ?? (datatable.name ~ "." ~ item.key) | trans %}
+
+        <div class="menu-item px-3">
+            {% if item.path %}
+                <a class="menu-link px-3 {{ item.contextClass ? "text-" ~ item.contextClass : "" }}"
+                   href="{{ item.path }}" data-kt-docs-table-filter="{{ item.key }}_row">
+                    {{ itemLabel }}
+                </a>
+            {% else %}
+                {# TODO: Plain text #}
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
