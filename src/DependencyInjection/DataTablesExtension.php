@@ -44,6 +44,7 @@ class DataTablesExtension extends Extension
         unset($config['renderer']);
 
         $container->setParameter('datatables.config', $config);
+        $container->setParameter('datatables.datetime_format', $config['datetime_format']);
 
         $container->registerForAutoconfiguration(AbstractColumn::class)
             ->addTag('datatables.column')

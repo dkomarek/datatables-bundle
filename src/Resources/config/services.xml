@@ -23,6 +23,12 @@
         <service id="Omines\DataTablesBundle\Column\TwigStringColumn">
             <argument type="service" id="twig" on-invalid="null" />
         </service>
+        <service id="Omines\DataTablesBundle\Column\ActionColumn">
+            <argument type="service" id="twig" on-invalid="null" />
+        </service>
+        <service id="Omines\DataTablesBundle\Column\DateTimeColumn">
+            <argument>%datatables.datetime_format%</argument>
+        </service>
 
         <!-- Exporters -->
         <service id="Omines\DataTablesBundle\Exporter\DataTableExporterCollection">

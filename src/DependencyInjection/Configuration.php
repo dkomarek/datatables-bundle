@@ -80,6 +80,10 @@ class Configuration implements ConfigurationInterface
                     ->info('Default translation domain to be used')
                     ->defaultValue('messages')
                 ->end()
+                ->scalarNode('datetime_format')
+                    ->info('Default format for DateTime column')
+                    ->defaultValue('c')
+                ->end()
             ->end()
         ;
 

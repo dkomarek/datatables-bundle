@@ -62,7 +62,7 @@ class DateTimeColumn extends AbstractColumn
         $resolver
             ->setDefaults([
                 'createFromFormat' => '',
-                'format' => 'c',
+                'format' => $this->format,
                 'nullValue' => '',
             ])
             ->setAllowedTypes('createFromFormat', 'string')
