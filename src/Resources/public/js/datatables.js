@@ -40,6 +40,20 @@
             }
         };
 
+        const searchByField = function(field, column) {
+            if (column.search() !== field.value) {
+                column
+                    .search(field.value)
+                    .draw();
+
+                if (field.value !== '') {
+                    $(field).addClass(config.activeFilterClass);
+                } else {
+                    $(field).removeClass(config.activeFilterClass);
+                }
+            }
+        };
+
         return new Promise((fulfill, reject) => {
             // Perform initial load
             $.ajax(typeof config.url === 'function' ? config.url(null) : config.url, {
@@ -110,6 +124,16 @@
                     })
                 }
 
+                // external filters handlers
+                $("input", "#" + config.filterHtmlId).on("keyup change clear", function () {
+                    searchByField(this, dt.column($(this).data("filter-index")));
+
+                });
+
+                $("select", "#" + config.filterHtmlId).on("change clear", function () {
+                    searchByField(this, dt.column($(this).data("filter-index")));
+                });
+
                 fulfill(dt);
             }).fail(function(xhr, cause, msg) {
                 console.error('DataTables request failed: ' + msg);
@@ -124,6 +148,7 @@
     $.fn.initDataTables.defaults = {
         method: 'POST',
         state: 'fragment',
+        activeFilterClass: 'bg-success bg-opacity-25',
         url: window.location.origin + window.location.pathname
     };
 

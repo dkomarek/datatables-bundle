@@ -14,18 +14,22 @@ namespace Omines\DataTablesBundle\Twig;
 
 use Omines\DataTablesBundle\DataTable;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 class DataTablesExtension extends \Twig\Extension\AbstractExtension
 {
     /** @var TranslatorInterface */
     protected $translator;
 
+    protected Environment $twig;
+
     /**
      * DataTablesExtension constructor.
      */
-    public function __construct(TranslatorInterface $translator)
+    public function __construct(TranslatorInterface $translator, Environment $twig)
     {
         $this->translator = $translator;
+        $this->twig = $twig;
     }
 
     /**
@@ -37,11 +41,22 @@ class DataTablesExtension extends \Twig\Extension\AbstractExtension
             new \Twig\TwigFunction('datatable_settings', function (DataTable $dataTable) {
                 return json_encode([
                     'name' => $dataTable->getName(),
+                    'filterHtmlId' => $dataTable->getFilterHtmlId(),
                     'method' => $dataTable->getMethod(),
                     'state' => $dataTable->getPersistState(),
                     'options' => [
                         'language' => $this->getLanguageSettings($dataTable),
                     ],
+                ]);
+            }, ['is_safe' => ['html']]),
+            new \Twig\TwigFunction('datatable_filter', function (DataTable $dataTable) {
+                return $this->twig->render("@DataTables/Filter/form.html.twig", [
+                    "datatable" => $dataTable,
+                ]);
+            }, ['is_safe' => ['html']]),
+            new \Twig\TwigFunction('datatable_wrapper', function (DataTable $dataTable) {
+                return $this->twig->render("@DataTables/wrapper.html.twig", [
+                    "datatable" => $dataTable,
                 ]);
             }, ['is_safe' => ['html']]),
         ];
@@ -52,9 +67,11 @@ class DataTablesExtension extends \Twig\Extension\AbstractExtension
      */
     private function getLanguageSettings(DataTable $dataTable)
     {
+        /*
         if ($dataTable->isLanguageFromCDN() && null !== ($cdnFile = $this->getCDNLanguageFile())) {
             return ['url' => '//cdn.datatables.net/plug-ins/1.10.15/i18n/' . $cdnFile];
         }
+        */
 
         $domain = $dataTable->getTranslationDomain();
 

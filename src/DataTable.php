@@ -21,6 +21,11 @@ use Omines\DataTablesBundle\Exception\InvalidConfigurationException;
 use Omines\DataTablesBundle\Exception\InvalidStateException;
 use Omines\DataTablesBundle\Exporter\DataTableExporterManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -101,6 +106,12 @@ class DataTable
     /** @var string */
     protected $translationDomain = 'messages';
 
+    /** @var FormInterface */
+    protected $filterForm;
+
+    /** @var FormView */
+    protected $filterView;
+
     /** @var DataTableRendererInterface */
     private $renderer;
 
@@ -113,7 +124,13 @@ class DataTable
     /**
      * DataTable constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, DataTableExporterManager $exporterManager, array $options = [], Instantiator $instantiator = null)
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher,
+        DataTableExporterManager $exporterManager,
+        FormFactoryInterface $formFactory,
+        array $options = [],
+        Instantiator $instantiator = null
+    )
     {
         $this->eventDispatcher = $eventDispatcher;
         $this->exporterManager = $exporterManager;
@@ -123,6 +140,8 @@ class DataTable
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
         $this->options = $resolver->resolve($options);
+
+        $this->filterForm = $formFactory->create();
     }
 
     /**
@@ -138,10 +157,24 @@ class DataTable
         $column = $this->instantiator->getColumn($type);
         $column->initialize($name, count($this->columns), $options, $this);
 
+        if ($column->isSearchable()) {
+            $column->createFilter($this->filterForm);
+        }
+
         $this->columns[] = $column;
         $this->columnsByName[$name] = $column;
 
         return $this;
+    }
+
+    public function getHtmlId(): string
+    {
+        return str_replace(".", "_", $this->getName());
+    }
+
+    public function getFilterHtmlId(): string
+    {
+        return $this->getHtmlId() . "-filter";
     }
 
     /**
@@ -187,6 +220,26 @@ class DataTable
     public function getAdapter(): AdapterInterface
     {
         return $this->adapter;
+    }
+
+    /**
+     * @return FormInterface
+     */
+    public function getFilterForm(): FormInterface
+    {
+        return $this->filterForm;
+    }
+
+    /**
+     * @return FormView
+     */
+    public function getFilterView(): FormView
+    {
+        if ($this->filterView === null) {
+            $this->filterView = $this->filterForm->createView();
+        }
+
+        return $this->filterView;
     }
 
     public function getColumn(int $index): AbstractColumn

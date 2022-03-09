@@ -15,6 +15,7 @@ namespace Omines\DataTablesBundle;
 use Omines\DataTablesBundle\DependencyInjection\Instantiator;
 use Omines\DataTablesBundle\Exporter\DataTableExporterManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class DataTableFactory
@@ -37,15 +38,26 @@ class DataTableFactory
     /** @var DataTableExporterManager */
     protected $exporterManager;
 
+    /** @var FormFactoryInterface */
+    protected $formFactory;
+
     /**
      * DataTableFactory constructor.
      */
-    public function __construct(array $config, DataTableRendererInterface $renderer, Instantiator $instantiator, EventDispatcherInterface $eventDispatcher, DataTableExporterManager $exporterManager)
+    public function __construct(
+        array $config,
+        DataTableRendererInterface $renderer,
+        Instantiator $instantiator,
+        EventDispatcherInterface $eventDispatcher,
+        FormFactoryInterface $formFactory,
+        DataTableExporterManager $exporterManager
+    )
     {
         $this->config = $config;
         $this->renderer = $renderer;
         $this->instantiator = $instantiator;
         $this->eventDispatcher = $eventDispatcher;
+        $this->formFactory = $formFactory;
         $this->exporterManager = $exporterManager;
     }
 
@@ -56,7 +68,13 @@ class DataTableFactory
     {
         $config = $this->config;
 
-        return (new DataTable($this->eventDispatcher, $this->exporterManager, array_merge($config['options'] ?? [], $options), $this->instantiator))
+        return (new DataTable(
+            $this->eventDispatcher,
+            $this->exporterManager,
+            $this->formFactory,
+            array_merge($config['options'] ?? [], $options),
+            $this->instantiator)
+        )
             ->setRenderer($this->renderer)
             ->setMethod($config['method'] ?? Request::METHOD_POST)
             ->setPersistState($config['persist_state'] ?? 'fragment')

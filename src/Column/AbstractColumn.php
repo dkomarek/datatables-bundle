@@ -14,6 +14,9 @@ namespace Omines\DataTablesBundle\Column;
 
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\Filter\AbstractFilter;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -112,6 +115,8 @@ abstract class AbstractColumn
                 'orderable' => null,
                 'orderField' => null,
                 'searchable' => null,
+                'filterType' => null,
+                'filterOptions' => [],
                 'globalSearchable' => null,
                 'filter' => null,
                 'className' => null,
@@ -128,6 +133,8 @@ abstract class AbstractColumn
             ->setAllowedTypes('orderable', ['null', 'boolean'])
             ->setAllowedTypes('orderField', ['null', 'string'])
             ->setAllowedTypes('searchable', ['null', 'boolean'])
+            ->setAllowedTypes('filterType', ['null', "string"])
+            ->setAllowedTypes('filterOptions', ['array'])
             ->setAllowedTypes('globalSearchable', ['null', 'boolean'])
             ->setAllowedTypes('filter', ['null', AbstractFilter::class])
             ->setAllowedTypes('className', ['null', 'string'])
@@ -203,6 +210,22 @@ abstract class AbstractColumn
     public function getFilter()
     {
         return $this->options['filter'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilterType()
+    {
+        return $this->options['filterType'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilterOptions(): array
+    {
+        return $this->options['filterOptions'];
     }
 
     /**
@@ -289,5 +312,28 @@ abstract class AbstractColumn
     public function isValidForSearch($value)
     {
         return true;
+    }
+
+    /**
+     * @param FormInterface $filterForm
+     * @return $this
+     */
+    public function createFilter(FormInterface $filterForm): self
+    {
+        $filterType = $this->getFilterType() ?? TextType::class;
+
+        $options = array_merge([
+            "label" => $this->getLabel(),
+            "required" => false,
+            "attr" => [
+                "class" => "form-control-solid",
+            ]
+        ], $this->getFilterOptions());
+
+        $options["attr"]["data-filter-index"] = $this->getIndex();
+
+        $filterForm->add($this->getName(), $filterType, $options);
+
+        return $this;
     }
 }
