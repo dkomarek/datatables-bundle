@@ -16,14 +16,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CheckboxColumn extends AbstractColumn
 {
-    private const DEFAULT_TEMPLATE = '<div class="px-2 form-check form-check-sm form-check-custom form-check-solid"><input class="form-check-input" type="checkbox" value="1"></div>';
+    private const DEFAULT_TEMPLATE = '<div class="px-2 form-check form-check-sm form-check-custom form-check-solid"><input class="form-check-input" type="checkbox" value="%value%"></div>';
 
     /**
      * {@inheritdoc}
      */
     protected function render($value, $context)
     {
-        return $this->getTemplate();
+        return str_replace("%value%", (string)$value, $this->getTemplate());
     }
 
     /**

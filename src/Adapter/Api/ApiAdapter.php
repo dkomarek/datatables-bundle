@@ -13,6 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ApiAdapter extends AbstractAdapter
 {
     private ApiClientInterface $client;
+    private array $queryProcessors;
 
     /**
      * {@inheritdoc}
@@ -24,6 +25,8 @@ class ApiAdapter extends AbstractAdapter
         $options = $resolver->resolve($options);
 
         $this->client = $options["client"];
+        $this->queryProcessors = [$options["query"]];
+
     }
 
     protected function prepareQuery(AdapterQuery $query)
@@ -65,6 +68,11 @@ class ApiAdapter extends AbstractAdapter
     protected function buildQuery(DataTableState $state): Query
     {
         $query = $this->createQuery();
+
+        // default filters
+        foreach($this->queryProcessors as $queryProcessor) {
+            $queryProcessor($query);
+        }
 
         // globalni filtr
         if (!empty($globalSearch = $state->getGlobalSearch())) {
@@ -116,9 +124,11 @@ class ApiAdapter extends AbstractAdapter
         $resolver
             ->setDefaults([
                 "client" => [],
+                "query" => static function(Query $query) {},
             ])
             ->setRequired(["client"])
-            ->setAllowedTypes("client", ApiClientInterface::class);
+            ->setAllowedTypes("client", ApiClientInterface::class)
+            ->setAllowedTypes("query", "callable");
         ;
     }
 }
