@@ -43,6 +43,8 @@ class CheckboxColumn extends AbstractColumn
 
         $resolver
             ->setRequired('template')
+            ->setDefault('orderable', false)
+            ->setDefault('searchable', false)
             ->setDefault('template', self::DEFAULT_TEMPLATE)
             ->setAllowedTypes('template', 'string')
         ;
