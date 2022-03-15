@@ -2,6 +2,6 @@
 
 <div class="row row-cols-lg-auto g-3 align-items-center" id="{{ datatable.filterHtmlId }}">
     {% for child in datatable.filterView.children %}
-        {{ form_row(child, {row_attr: {class: "form-floating"}}) }}
+        {{ form_row(child, {row_attr: {class: "form-floating mw-200px"}}) }}
     {% endfor %}
 </div>
