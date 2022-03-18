@@ -46,10 +46,17 @@
                     .search(field.value)
                     .draw();
 
+                let $field = $(field);
+
+                // for Select2 element
+                if ($field.hasClass("select2-hidden-accessible")) {
+                    $field = $field.next(".select2").find(".select2-selection");
+                }
+
                 if (field.value !== '') {
-                    $(field).addClass(config.activeFilterClass);
+                    $field.addClass(config.activeFilterClass);
                 } else {
-                    $(field).removeClass(config.activeFilterClass);
+                    $field.removeClass(config.activeFilterClass);
                 }
             }
         };
@@ -109,7 +116,8 @@
                         if (!baseState) {
                             baseState = data;
                         } else {
-                            var diff = data.filter(el => { return baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0; });
+                            //var diff = data.filter(el => { return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0); });
+                            var diff = data.filter(el => { return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0) || el.indexOf('_dt=') === 0; });
                             switch (config.state) {
                                 case 'fragment':
                                     history.replaceState(null, null, window.location.origin + window.location.pathname + window.location.search
@@ -124,13 +132,19 @@
                     })
                 }
 
+                /*
+                $("select.datatable-filter", "#" + config.filterHtmlId).each(function() {
+                    console.log(dt.column($(this).data("filter-index")));
+                });
+                 */
+
                 // external filters handlers
-                $("input", "#" + config.filterHtmlId).on("keyup change clear", function () {
+                $("input.datatable-filter", "#" + config.filterHtmlId).on("keyup change clear", function () {
                     searchByField(this, dt.column($(this).data("filter-index")));
 
                 });
 
-                $("select", "#" + config.filterHtmlId).on("change clear", function () {
+                $("select.datatable-filter", "#" + config.filterHtmlId).on("change clear", function () {
                     searchByField(this, dt.column($(this).data("filter-index")));
                 });
 
@@ -147,7 +161,7 @@
      */
     $.fn.initDataTables.defaults = {
         method: 'POST',
-        state: 'fragment',
+        state: 'query',
         activeFilterClass: 'bg-success bg-opacity-25',
         url: window.location.origin + window.location.pathname
     };

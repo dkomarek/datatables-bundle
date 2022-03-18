@@ -324,10 +324,12 @@ class DataTable
             default:
                 throw new InvalidConfigurationException(sprintf("Unknown request method '%s'", $this->getMethod()));
         }
+
         if ($this->getName() === $parameters->get('_dt')) {
             if (null === $this->state) {
                 $this->state = DataTableState::fromDefaults($this);
             }
+            
             $this->state->applyParameters($parameters);
         }
 
