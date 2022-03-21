@@ -1,0 +1,6 @@
+{% if datatable.hasFilters %}
+    <button class="btn btn-light-primary collapsible m-2" data-bs-toggle="collapse" data-bs-target="#{{ datatable.filterHtmlId }}">
+        <i class="bi bi-funnel-fill"></i>
+        {{ "datatable.common.filter" | trans }}
+    </button>
+{% endif %}

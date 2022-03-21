@@ -16,7 +16,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CheckboxColumn extends AbstractColumn
 {
-    private const DEFAULT_TEMPLATE = '<div class="px-2 form-check form-check-sm form-check-custom form-check-solid"><input class="form-check-input" type="checkbox" value="%value%"></div>';
+    private const DEFAULT_CHECKROW_TEMPLATE = '<div class="px-2 form-check form-check-sm form-check-custom form-check-solid"><input class="form-check-input datatable-check-row" type="checkbox" value="%value%"></div>';
+    private const DEFAULT_CHECKALL_TEMPLATE = '<div class="px-2 form-check form-check-sm form-check-custom form-check-solid"><input class="form-check-input datatable-check-all" type="checkbox" data-kt-check="true" data-kt-check-target="#%datatable_id% .datatable-check-row"></div>';
 
     /**
      * {@inheritdoc}
@@ -34,6 +35,11 @@ class CheckboxColumn extends AbstractColumn
         return $value;
     }
 
+    public function getLabel()
+    {
+        return str_replace("%datatable_id%", $this->getDataTable()->getHtmlId(), $this->options['label']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -45,7 +51,9 @@ class CheckboxColumn extends AbstractColumn
             ->setRequired('template')
             ->setDefault('orderable', false)
             ->setDefault('searchable', false)
-            ->setDefault('template', self::DEFAULT_TEMPLATE)
+            ->setDefault('template', self::DEFAULT_CHECKROW_TEMPLATE)
+            ->setDefault('label', self::DEFAULT_CHECKALL_TEMPLATE)
+            ->setDefault('labelTrans', false)
             ->setAllowedTypes('template', 'string')
         ;
 

@@ -4,16 +4,17 @@ datatable:
         you_need_to_select_at_least_one_element: 'Musíte vybrat alespoň jeden prvek.'
         search: Hledat
         execute: Vykonat
+        filter: Filtr
         ok: OK
     datatable:
         searchPlaceholder: ''
         emptyTable: 'Tabulka neobsahuje žádná data'
-        info: 'Zobrazuji _START_ až _END_ z celkem _TOTAL_ záznamů'
-        infoEmpty: 'Zobrazuji 0 až 0 z 0 záznamů'
+        info: 'Celkem _TOTAL_ záznamů'
+        infoEmpty: 'Žádné záznamy'
         infoFiltered: '(filtrováno z celkem _MAX_ záznamů)'
         infoPostFix: ''
         infoThousands: ' '
-        lengthMenu: 'Zobraz záznamů _MENU_'
+        lengthMenu: 'Na stránku _MENU_'
         loadingRecords: Načítám...
         processing: Načítám...
         search: 'Hledat:'

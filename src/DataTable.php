@@ -510,6 +510,11 @@ class DataTable
         return $this;
     }
 
+    public function hasFilters(): bool
+    {
+        return $this->filterForm->count() > 0;
+    }
+
     /**
      * @return $this
      */

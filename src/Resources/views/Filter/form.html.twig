@@ -1,16 +1,18 @@
 {% form_theme datatable.filterView 'bootstrap_5_layout.html.twig' %}
 
-<div class="border border-dashed border-gray-300 rounded p-2">
-    <div class="row row-cols-lg-auto g-3 align-items-center" id="{{ datatable.filterHtmlId }}">
-        {% for child in datatable.filterView.children %}
-            {{ form_row(child, {
-                attr: {
-                    class: "datatable-filter h-35px form-select-solid form-select-sm form-control-solid form-control-sm min-w-150px max-w-200px",
-                    "data-allow-clear": "true",
-                    "data-placeholder": ""
-                },
-                label_attr: {class: "text-muted fs-8"}
-            }) }}
-        {% endfor %}
+{% if datatable.hasFilters %}
+    <div class="border border-dashed border-gray-300 rounded p-2 collapse" id="{{ datatable.filterHtmlId }}">
+        <div class="row row-cols-lg-auto g-3 align-items-center">
+            {% for child in datatable.filterView.children %}
+                {{ form_row(child, {
+                    attr: {
+                        class: "datatable-filter h-35px form-select-solid form-select-sm form-control-solid form-control-sm min-w-150px max-w-200px",
+                        "data-allow-clear": "true",
+                        "data-placeholder": ""
+                    },
+                    label_attr: {class: "text-muted fs-8"}
+                }) }}
+            {% endfor %}
+        </div>
     </div>
-</div>
+{% endif %}

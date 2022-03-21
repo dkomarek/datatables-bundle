@@ -14,7 +14,6 @@ namespace Omines\DataTablesBundle\Column;
 
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\Filter\AbstractFilter;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -108,6 +107,7 @@ abstract class AbstractColumn
         $resolver
             ->setDefaults([
                 'label' => null,
+                'labelTrans' => true,
                 'data' => null,
                 'field' => null,
                 'propertyPath' => null,
@@ -126,6 +126,7 @@ abstract class AbstractColumn
                 'rightExpr' => null,
             ])
             ->setAllowedTypes('label', ['null', 'string'])
+            ->setAllowedTypes('labelTrans', ['null', 'bool'])
             ->setAllowedTypes('data', ['null', 'string', 'callable'])
             ->setAllowedTypes('field', ['null', 'string'])
             ->setAllowedTypes('propertyPath', ['null', 'string'])
@@ -163,6 +164,14 @@ abstract class AbstractColumn
     public function getLabel()
     {
         return $this->options['label'] ?? "{$this->dataTable->getName()}.columns.{$this->getName()}";
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLabelTranslatable(): bool
+    {
+        return $this->options['labelTrans'] ?? false;
     }
 
     /**

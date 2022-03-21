@@ -9,6 +9,7 @@ class ActionColumnItem
     private ?string $icon;
     private ?string $label = null;
     private ?string $contextClass = null;
+    private ?string $confirmMessage = null;
 
     public function __construct(string $key, string $path = null, string $icon = null)
     {
@@ -104,6 +105,25 @@ class ActionColumnItem
     public function setContextClass(?string $contextClass): self
     {
         $this->contextClass = $contextClass;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getConfirmMessage(): ?string
+    {
+        return $this->confirmMessage;
+    }
+
+    /**
+     * @param string|null $confirmMessage
+     * @return self
+     */
+    public function setConfirmMessage(?string $confirmMessage): self
+    {
+        $this->confirmMessage = $confirmMessage;
+
         return $this;
     }
 }

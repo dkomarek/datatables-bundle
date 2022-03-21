@@ -132,12 +132,6 @@
                     })
                 }
 
-                /*
-                $("select.datatable-filter", "#" + config.filterHtmlId).each(function() {
-                    console.log(dt.column($(this).data("filter-index")));
-                });
-                 */
-
                 // external filters handlers
                 $("input.datatable-filter", "#" + config.filterHtmlId).on("keyup change clear", function () {
                     searchByField(this, dt.column($(this).data("filter-index")));

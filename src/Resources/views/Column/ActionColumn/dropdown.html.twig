@@ -10,7 +10,10 @@
         <div class="menu-item px-3">
             {% if item.path %}
                 <a class="menu-link px-3 {{ item.contextClass ? "text-" ~ item.contextClass : "" }}"
-                   href="{{ item.path }}" data-kt-docs-table-filter="{{ item.key }}_row">
+                   href="{{ item.path }}"
+                        {{ item.confirmMessage ? "data-ap-confirm-message=" ~ item.confirmMessage : "" }}
+                        {{ item.contextClass == "danger" ? "data-ap-confirm='true'" : "" }}
+                >
                     {{ itemLabel }}
                 </a>
             {% else %}

@@ -55,6 +55,11 @@ class DataTablesExtension extends \Twig\Extension\AbstractExtension
                     "datatable" => $dataTable,
                 ]);
             }, ['is_safe' => ['html']]),
+            new \Twig\TwigFunction('datatable_filter_toggle', function (DataTable $dataTable) {
+                return $this->twig->render("@DataTables/Filter/toggle.html.twig", [
+                    "datatable" => $dataTable,
+                ]);
+            }, ['is_safe' => ['html']]),
             new \Twig\TwigFunction('datatable_wrapper', function (DataTable $dataTable) {
                 return $this->twig->render("@DataTables/wrapper.html.twig", [
                     "datatable" => $dataTable,
