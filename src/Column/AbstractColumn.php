@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Omines\DataTablesBundle\Column;
 
+use Omines\DataTablesBundle\Adapter\Api\Query;
 use Omines\DataTablesBundle\DataTable;
 use Omines\DataTablesBundle\Filter\AbstractFilter;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -116,6 +117,8 @@ abstract class AbstractColumn
                 'orderField' => null,
                 'searchable' => null,
                 'filterType' => null,
+                'filterField' => null,
+                'filterCallback' => null,
                 'filterOptions' => [],
                 'globalSearchable' => null,
                 'filter' => null,
@@ -134,7 +137,9 @@ abstract class AbstractColumn
             ->setAllowedTypes('orderable', ['null', 'boolean'])
             ->setAllowedTypes('orderField', ['null', 'string'])
             ->setAllowedTypes('searchable', ['null', 'boolean'])
-            ->setAllowedTypes('filterType', ['null', "string"])
+            ->setAllowedTypes('filterType', ['null', 'string'])
+            ->setAllowedTypes('filterField', ['null', 'string'])
+            ->setAllowedTypes('filterCallback', ['null', 'callable'])
             ->setAllowedTypes('filterOptions', ['array'])
             ->setAllowedTypes('globalSearchable', ['null', 'boolean'])
             ->setAllowedTypes('filter', ['null', AbstractFilter::class])
@@ -227,6 +232,33 @@ abstract class AbstractColumn
     public function getFilterType()
     {
         return $this->options['filterType'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFilterField()
+    {
+        return $this->options['filterField'] ?? $this->getField();
+    }
+
+    /**
+     * @param Query $query
+     * @return bool
+     */
+    public function filterCallback(Query $query, string $value): bool
+    {
+        $callback = $this->options['filterCallback'];
+        if ($callback === null) {
+            return false;
+        }
+
+        if (is_callable($callback)) {
+            call_user_func($callback, $query, $value);
+            return true;
+        }
+
+        return false;
     }
 
     /**

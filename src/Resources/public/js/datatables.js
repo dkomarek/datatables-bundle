@@ -22,6 +22,8 @@
             state = ''
         ;
 
+        var searchTimeout;
+
         // Load page state if needed
         switch (config.state) {
             case 'fragment':
@@ -40,25 +42,29 @@
             }
         };
 
-        const searchByField = function(field, column) {
-            if (column.search() !== field.value) {
-                column
-                    .search(field.value)
-                    .draw();
+        const searchByField = function(field, dt) {
+            if (searchTimeout) { clearTimeout(searchTimeout); }
+            searchTimeout = setTimeout(function () {
+                const column = dt.column($(field).data("filter-index"));
+                if (column.search() !== field.value) {
+                    column
+                        .search(field.value)
+                        .draw();
 
-                let $field = $(field);
+                    let $field = $(field);
 
-                // for Select2 element
-                if ($field.hasClass("select2-hidden-accessible")) {
-                    $field = $field.next(".select2").find(".select2-selection");
+                    // for Select2 element
+                    if ($field.hasClass("select2-hidden-accessible")) {
+                        $field = $field.next(".select2").find(".select2-selection");
+                    }
+
+                    if (field.value !== '') {
+                        $field.addClass(config.activeFilterClass);
+                    } else {
+                        $field.removeClass(config.activeFilterClass);
+                    }
                 }
-
-                if (field.value !== '') {
-                    $field.addClass(config.activeFilterClass);
-                } else {
-                    $field.removeClass(config.activeFilterClass);
-                }
-            }
+            }, 1000);
         };
 
         return new Promise((fulfill, reject) => {
@@ -134,12 +140,11 @@
 
                 // external filters handlers
                 $("input.datatable-filter", "#" + config.filterHtmlId).on("keyup change clear", function () {
-                    searchByField(this, dt.column($(this).data("filter-index")));
-
+                    searchByField(this, dt);
                 });
 
                 $("select.datatable-filter", "#" + config.filterHtmlId).on("change clear", function () {
-                    searchByField(this, dt.column($(this).data("filter-index")));
+                    searchByField(this, dt);
                 });
 
                 fulfill(dt);

@@ -96,7 +96,9 @@ class ApiAdapter extends AbstractAdapter
                     }
                 }
 
-                $query->addFilter($column->getField(), $search);
+                if (!$column->filterCallback($query, $search)) {
+                    $query->addFilter($column->getFilterField(), $search);
+                }
             }
         }
 
