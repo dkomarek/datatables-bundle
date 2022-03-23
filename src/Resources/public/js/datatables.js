@@ -42,29 +42,34 @@
             }
         };
 
+        const highlightFilterField = function(field) {
+            let $field = $(field);
+
+            // for Select2 element
+            if ($field.hasClass("select2-hidden-accessible")) {
+                $field = $field.next(".select2").find(".select2-selection");
+            }
+
+            if (field.value !== '') {
+                $field.addClass(config.filterActiveClass);
+            } else {
+                $field.removeClass(config.filterActiveClass);
+            }
+        };
+
+        // column field filtering
         const searchByField = function(field, dt) {
-            if (searchTimeout) { clearTimeout(searchTimeout); }
-            searchTimeout = setTimeout(function () {
-                const column = dt.column($(field).data("filter-index"));
-                if (column.search() !== field.value) {
+            const column = dt.column($(field).data("filter-index"));
+            if (column.search() !== field.value) {
+                highlightFilterField(field);
+
+                if (searchTimeout) { clearTimeout(searchTimeout); }
+                searchTimeout = setTimeout(function () {
                     column
                         .search(field.value)
                         .draw();
-
-                    let $field = $(field);
-
-                    // for Select2 element
-                    if ($field.hasClass("select2-hidden-accessible")) {
-                        $field = $field.next(".select2").find(".select2-selection");
-                    }
-
-                    if (field.value !== '') {
-                        $field.addClass(config.activeFilterClass);
-                    } else {
-                        $field.removeClass(config.activeFilterClass);
-                    }
-                }
-            }, 1000);
+                }, config.filterTimeout);
+            }
         };
 
         return new Promise((fulfill, reject) => {
@@ -161,7 +166,8 @@
     $.fn.initDataTables.defaults = {
         method: 'POST',
         state: 'query',
-        activeFilterClass: 'bg-success bg-opacity-25',
+        filterActiveClass: 'bg-success bg-opacity-25',
+        filterTimeout: 1000,
         url: window.location.origin + window.location.pathname
     };
 
