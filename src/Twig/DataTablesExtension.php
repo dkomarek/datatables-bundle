@@ -39,15 +39,17 @@ class DataTablesExtension extends \Twig\Extension\AbstractExtension
     {
         return [
             new \Twig\TwigFunction('datatable_settings', function (DataTable $dataTable) {
+                $options = $dataTable->getInitialOptions();
+                $options['language'] = $this->getLanguageSettings($dataTable);
+
                 return json_encode([
                     'name' => $dataTable->getName(),
+                    'template' => $dataTable->renderTemplate(),
                     'filterHtmlId' => $dataTable->getFilterHtmlId(),
                     'htmlId' => $dataTable->getHtmlId(),
                     'method' => $dataTable->getMethod(),
                     'state' => $dataTable->getPersistState(),
-                    'options' => [
-                        'language' => $this->getLanguageSettings($dataTable),
-                    ],
+                    'options' => $options,
                 ]);
             }, ['is_safe' => ['html', 'js']]),
             new \Twig\TwigFunction('datatable_filter', function (DataTable $dataTable) {

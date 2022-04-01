@@ -49,6 +49,7 @@ class DataTable
         'ordering' => true,
         'searching' => false,
         'search' => null,
+        'searchCols' => [],
         'autoWidth' => false,
         'order' => [],
         'searchDelay' => 400,
@@ -90,7 +91,7 @@ class DataTable
     protected $name = 'dt';
 
     /** @var string */
-    protected $persistState = 'fragment';
+    protected $persistState = 'query';
 
     /** @var string */
     protected $template = self::DEFAULT_TEMPLATE;
@@ -118,6 +119,9 @@ class DataTable
 
     /** @var Instantiator */
     private $instantiator;
+
+    /** @var bool */
+    private $init;
 
     /**
      * DataTable constructor.
@@ -306,7 +310,7 @@ class DataTable
 
     public function isCallback(): bool
     {
-        return (null === $this->state) ? false : $this->state->isCallback();
+        return ($this->init || null === $this->state) ? false : $this->state->isCallback();
     }
 
     /**
@@ -314,26 +318,40 @@ class DataTable
      */
     public function handleRequest(Request $request): self
     {
-        switch ($this->getMethod()) {
-            case Request::METHOD_GET:
-                $parameters = $request->query;
-                break;
-            case Request::METHOD_POST:
-                $parameters = $request->request;
-                break;
-            default:
-                throw new InvalidConfigurationException(sprintf("Unknown request method '%s'", $this->getMethod()));
+        if ($request->getMethod() === Request::METHOD_GET) {
+            $parameters = $request->query;
+            $this->init = true;
+        } elseif($request->getMethod() === Request::METHOD_POST) {
+            $parameters = $request->request;
+            $this->init = false;
+        } else {
+            throw new InvalidConfigurationException(sprintf("Unknown request method '%s'", $this->getMethod()));
         }
 
-        if ($this->getName() === $parameters->get('_dt')) {
+        //if ($this->getName() === $parameters->get('_dt')) {
             if (null === $this->state) {
                 $this->state = DataTableState::fromDefaults($this);
             }
             
-            $this->state->applyParameters($parameters);
+            $this->state->applyParameters($parameters, $this->init);
+        //}
+
+        // set default filter values
+        if ($this->init) {
+            $filterData = [];
+            foreach($this->state->getSearchColumns() as $columnName => $searchColumn) {
+                $filterData[$columnName] = $searchColumn['search'];
+            }
+
+            $this->filterForm->setData($filterData);
         }
 
         return $this;
+    }
+
+    public function renderTemplate(): string
+    {
+        return $this->renderer->renderDataTable($this, $this->template, $this->templateParams);
     }
 
     public function getResponse(): Response
@@ -357,19 +375,15 @@ class DataTable
             'recordsFiltered' => $resultSet->getTotalDisplayRecords(),
             'data' => iterator_to_array($resultSet->getData()),
         ];
-        if ($this->state->isInitial()) {
-            $response['options'] = $this->getInitialResponse();
-            $response['template'] = $this->renderer->renderDataTable($this, $this->template, $this->templateParams);
-        }
 
         return new JsonResponse($response);
     }
 
-    protected function getInitialResponse(): array
+    public function getInitialOptions(): array
     {
-        return array_merge($this->getOptions(), [
+        $options = array_merge($this->getOptions(), [
             'columns' => array_map(
-                function (AbstractColumn $column) {
+                static function (AbstractColumn $column) {
                     return [
                         'data' => $column->getName(),
                         'orderable' => $column->isOrderable(),
@@ -380,6 +394,29 @@ class DataTable
                 }, $this->getColumns()
             ),
         ]);
+
+        // page length
+        if ($this->state->getLength() !== null) {
+            $options["pageLength"] = $this->state->getLength();
+        }
+
+        // filters
+        $searchCols = [];
+
+        foreach ($this->getColumns() as $column) {
+            $searchCols[] = $this->state->getSearchColumns()[$column->getName()] ?? null;
+        }
+
+        $options["searchCols"] = $searchCols;
+
+        // order
+        $options["order"] = array_map(static function($order) {
+            /** @var AbstractColumn $column */
+            $column = $order[0];
+            return [$column->getIndex(), $order[1]];
+        }, $this->state->getOrderBy());
+
+        return $options;
     }
 
     protected function getResultSet(): ResultSetInterface

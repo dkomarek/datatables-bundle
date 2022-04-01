@@ -33,7 +33,10 @@
                 state = window.location.search;
                 break;
         }
+
         state = (state.length > 1 ? deparam(state.substr(1)) : {});
+
+        //state = (state.length > 1 ? deparam(state.substr(1)) : {});
         var persistOptions = config.state === 'none' ? {} : {
             stateSave: true,
             stateLoadCallback: function(s, cb) {
@@ -73,89 +76,81 @@
         };
 
         return new Promise((fulfill, reject) => {
-            // Perform initial load
-            $.ajax(typeof config.url === 'function' ? config.url(null) : config.url, {
-                method: config.method,
-                data: {
-                    _dt: config.name,
-                    _init: true
+            var baseState;
+
+            // Merge all options from different sources together and add the Ajax loader
+            var dtOpts = $.extend({}, typeof config.options === 'function' ? {} : config.options, options, persistOptions, {
+                ajax: function(request, drawCallback, settings) {
+                    request._dt = config.name;
+                    $.ajax(typeof config.url === 'function' ? config.url(dt) : config.url, {
+                        method: config.method,
+                        data: request
+                    }).done(function(data) {
+                        drawCallback(data);
+                        fulfill(dt);
+                    }).fail(function(xhr, cause, msg) {
+                        console.error('DataTables request failed: ' + msg);
+                        reject(cause);
+                    });
                 }
-            }).done(function(data) {
-                var baseState;
+            });
 
-                // Merge all options from different sources together and add the Ajax loader
-                var dtOpts = $.extend({}, data.options, typeof config.options === 'function' ? {} : config.options, options, persistOptions, {
-                    ajax: function (request, drawCallback, settings) {
-                        if (data) {
-                            data.draw = request.draw;
-                            drawCallback(data);
-                            data = null;
-                            if (Object.keys(state).length) {
-                                var api = new $.fn.dataTable.Api( settings );
-                                var merged = $.extend(true, {}, api.state(), state);
+            if (typeof config.options === 'function') {
+                dtOpts = config.options(dtOpts);
+            }
 
-                                api
-                                    .order(merged.order)
-                                    .search(merged.search.search)
-                                    .page.len(merged.length)
-                                    .page(merged.start / merged.length)
-                                    .draw(false);
-                            }
-                        } else {
-                            request._dt = config.name;
-                            $.ajax(typeof config.url === 'function' ? config.url(dt) : config.url, {
-                                method: config.method,
-                                data: request
-                            }).done(function(data) {
-                                drawCallback(data);
-                            })
+            root.html(config.template);
+            dt = $('table', root).DataTable(dtOpts);
+            if (config.state !== 'none') {
+                dt.on('draw.dt', function(e) {
+                    var data = $.param(dt.state()).split('&');
+
+                    // First draw establishes state, subsequent draws run diff on the first
+                    if (!baseState) {
+                        baseState = data;
+                    } else {
+                        console.log(dt.state());
+                        var diff = data.filter(el => {
+                            return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0 && el.indexOf('childRows') !== 0)
+                                || el.indexOf('_dt=') === 0;
+                        });
+                        switch (config.state) {
+                            case 'fragment':
+                                history.replaceState(null, null, window.location.origin + window.location.pathname + window.location.search
+                                    + '#' + decodeURIComponent(diff.join('&')));
+                                break;
+                            case 'query':
+                                history.replaceState(null, null, window.location.origin + window.location.pathname
+                                    + '?' + decodeURIComponent(diff.join('&') + window.location.hash));
+                                break;
                         }
                     }
                 });
+            }
 
-                if (typeof config.options === 'function') {
-                    dtOpts = config.options(dtOpts);
+            // init filters highlight
+            for (let columnIndex in dtOpts.searchCols){
+                if (dtOpts.searchCols.hasOwnProperty(columnIndex)) {
+                    const searchCol = dtOpts.searchCols[columnIndex];
+
+                    if (searchCol.sSearch.length === 0) {
+                        continue;
+                    }
+
+                    const $filterField = $("[data-filter-index=" + columnIndex + "]", "#" + config.filterHtmlId);
+                    if ($filterField.length > 0) {
+                        highlightFilterField($filterField.get(0));
+                    }
                 }
+            }
 
-                root.html(data.template);
-                dt = $('table', root).DataTable(dtOpts);
-                if (config.state !== 'none') {
-                    dt.on('draw.dt', function(e) {
-                        var data = $.param(dt.state()).split('&');
+            // external filters handlers
+            $("input.datatable-filter", "#" + config.filterHtmlId).on("keyup change clear", function () {
+                searchByField(this, dt);
+            });
 
-                        // First draw establishes state, subsequent draws run diff on the first
-                        if (!baseState) {
-                            baseState = data;
-                        } else {
-                            //var diff = data.filter(el => { return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0); });
-                            var diff = data.filter(el => { return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0) || el.indexOf('_dt=') === 0; });
-                            switch (config.state) {
-                                case 'fragment':
-                                    history.replaceState(null, null, window.location.origin + window.location.pathname + window.location.search
-                                        + '#' + decodeURIComponent(diff.join('&')));
-                                    break;
-                                case 'query':
-                                    history.replaceState(null, null, window.location.origin + window.location.pathname
-                                        + '?' + decodeURIComponent(diff.join('&') + window.location.hash));
-                                    break;
-                            }
-                        }
-                    })
-                }
-
-                // external filters handlers
-                $("input.datatable-filter", "#" + config.filterHtmlId).on("keyup change clear", function () {
-                    searchByField(this, dt);
-                });
-
-                $("select.datatable-filter", "#" + config.filterHtmlId).on("change clear", function () {
-                    searchByField(this, dt);
-                });
-
-                fulfill(dt);
-            }).fail(function(xhr, cause, msg) {
-                console.error('DataTables request failed: ' + msg);
-                reject(cause);
+            $("select.datatable-filter", "#" + config.filterHtmlId).on("change clear", function () {
+                searchByField(this, dt);
             });
         });
     };

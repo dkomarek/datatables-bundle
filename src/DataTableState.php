@@ -79,11 +79,11 @@ class DataTableState
     /**
      * Loads datatables state from a parameter bag on top of any existing settings.
      */
-    public function applyParameters(ParameterBag $parameters): void
+    public function applyParameters(ParameterBag $parameters, bool $isInitial): void
     {
         $this->draw = $parameters->getInt('draw');
         $this->isCallback = true;
-        $this->isInitial = $parameters->getBoolean('_init', false);
+        $this->isInitial = $isInitial;
         $this->exporterName = $parameters->get('_exporter');
 
         $this->start = (int) $parameters->get('start', $this->start);
@@ -101,8 +101,16 @@ class DataTableState
         if ($parameters->has('order')) {
             $this->orderBy = [];
             foreach ($parameters->all()['order'] ?? [] as $order) {
-                $column = $this->getDataTable()->getColumn((int) $order['column']);
-                $this->addOrderBy($column, $order['dir'] ?? DataTable::SORT_ASCENDING);
+                if ($this->isInitial) {
+                    $index = (int) $order[0];
+                    $dir = $order[1] ?? DataTable::SORT_ASCENDING;
+                } else {
+                    $index = (int) $order['column'];
+                    $dir = $order['dir'] ?? DataTable::SORT_ASCENDING;
+                }
+
+                $column = $this->getDataTable()->getColumn($index);
+                $this->addOrderBy($column, $dir);
             }
         }
     }
@@ -111,7 +119,7 @@ class DataTableState
     {
         foreach ($parameters->all()['columns'] ?? [] as $key => $search) {
             $column = $this->dataTable->getColumn((int) $key);
-            $value = $this->isInitial ? $search : $search['search']['value'];
+            $value = $this->isInitial ? $search['search']['search'] : $search['search']['value'];
 
             if ($column->isSearchable() && ('' !== trim($value))) {
                 $this->setColumnSearch($column, $value);
