@@ -34,8 +34,6 @@
                 break;
         }
 
-        state = (state.length > 1 ? deparam(state.substr(1)) : {});
-
         //state = (state.length > 1 ? deparam(state.substr(1)) : {});
         var persistOptions = config.state === 'none' ? {} : {
             stateSave: true,
@@ -102,14 +100,13 @@
             root.html(config.template);
             dt = $('table', root).DataTable(dtOpts);
             if (config.state !== 'none') {
-                dt.on('draw.dt', function(e) {
+                dt.on('draw.dt', function() {
                     var data = $.param(dt.state()).split('&');
 
                     // First draw establishes state, subsequent draws run diff on the first
                     if (!baseState) {
                         baseState = data;
                     } else {
-                        console.log(dt.state());
                         var diff = data.filter(el => {
                             return (baseState.indexOf(el) === -1 && el.indexOf('time=') !== 0 && el.indexOf('childRows') !== 0)
                                 || el.indexOf('_dt=') === 0;
