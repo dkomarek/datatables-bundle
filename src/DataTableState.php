@@ -118,7 +118,12 @@ class DataTableState
     private function handleSearch(ParameterBag $parameters): void
     {
         foreach ($parameters->all()['columns'] ?? [] as $key => $search) {
-            $column = $this->dataTable->getColumn((int) $key);
+            if (is_numeric($key)) {
+                $column = $this->dataTable->getColumn((int) $key);
+            } else {
+                $column = $this->dataTable->getColumnByName($key);
+            }
+
             $value = $this->isInitial ? $search['search']['search'] : $search['search']['value'];
 
             if ($column->isSearchable() && ('' !== trim($value))) {
