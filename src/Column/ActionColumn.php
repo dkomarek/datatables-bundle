@@ -37,6 +37,10 @@ class ActionColumn extends TwigColumn
             $items = $items($context);
         }
 
+        if (empty($items)) {
+            return "";
+        }
+
         return $this->twig->render($this->getTemplate(), [
             "row" => $context,
             "value" => $value,
