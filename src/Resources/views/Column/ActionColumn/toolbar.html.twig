@@ -6,7 +6,7 @@
             <a class="btn btn-icon btn-bg-light btn-sm w-30px h-30px me-1 btn-active-light btn-active-color-{{ item.contextClass ?? "primary" }}"
                href="{{ item.path }}" title="{{ itemLabel }}"
                     {{ item.confirmMessage ? "data-ap-confirm-message=" ~ item.confirmMessage : "" }}
-                    {{ item.contextClass == "danger" ? "data-ap-confirm='true'" : "" }}
+                    {{ item.contextClass == "danger" ? "data-ap-confirm='true' data-no-swup='1'" : "" }}
             >
                 <i class="{{ item.icon }}"></i>
             </a>
@@ -14,7 +14,7 @@
             <a class="btn btn-sm {{ item.contextClass ? "btn-" ~ item.contextClass : "btn-light" }}"
                href="{{ item.path }}"
                     {{ item.confirmMessage ? "data-ap-confirm-message=" ~ item.confirmMessage : "" }}
-                    {{ item.contextClass == "danger" ? "data-ap-confirm='true'" : "" }}
+                    {{ item.contextClass == "danger" ? "data-ap-confirm='true' data-no-swup='1'" : "" }}
             >
                 {{ itemLabel }}
             </a>

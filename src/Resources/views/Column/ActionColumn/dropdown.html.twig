@@ -12,7 +12,7 @@
                 <a class="menu-link px-3 {{ item.contextClass ? "text-" ~ item.contextClass : "" }}"
                    href="{{ item.path }}"
                         {{ item.confirmMessage ? "data-ap-confirm-message=" ~ item.confirmMessage : "" }}
-                        {{ item.contextClass == "danger" ? "data-ap-confirm='true'" : "" }}
+                        {{ item.contextClass == "danger" ? "data-ap-confirm='true' data-no-swup='1'" : "" }}
                 >
                     {{ itemLabel }}
                 </a>
